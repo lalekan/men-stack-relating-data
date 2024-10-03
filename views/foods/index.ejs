@@ -8,9 +8,13 @@
   <body>
     <h1>Welcome to CookBook</h1>
     <ul>
-      <% allFood.forEach(fruit => { %>
-        <li><a href="/fruits/<%= fruit._id %>"><%= fruit.name %></a></li>
-      <% }); %>
+      <% if (food && food.length > 0) { %>
+        <% food.forEach((item) => { %> <!-- Loop over each food item -->
+            <li><%= item.name %> - Calories: <%= item.calories %>, Expiration: <%= item.expirationDate.toDateString() %></li>
+        <% }) %>
+      <% } else { %>
+        <li>No food items found.</li>
+      <% } %>
     </ul>
   </body>  
 </html>
