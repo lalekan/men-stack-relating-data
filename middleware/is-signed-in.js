@@ -1,13 +1,13 @@
-// middleware/is-signed-in.js
-
 const isSignedIn = (req, res, next) => {
-    if (req.session.user){
-      return next();
-    } else {
-      res.redirect('/auth/sign-in')
-    }
-    // res.redirect('/auth/sign-in');
+  console.log('Checking if user is signed in');
+  if (req.session.user) {
+    console.log('User is signed in:', req.session.user);
+    req.user = req.session.user; 
+    return next(); 
+  } else {
+    console.log('User is not signed in, redirecting to sign-in');
+    return res.redirect('/auth/sign-in'); 
+  }
 };
-  
-  module.exports = isSignedIn;
-  
+
+module.exports = isSignedIn;

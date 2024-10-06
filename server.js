@@ -4,10 +4,11 @@ const express = require('express');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const path = require('path'); // Add this line
 
 const passUserToView = require('./middleware/pass-user-to-view.js');
 const authController = require('./controllers/auth.js');
-const isSignedIn = require('./middleware/is-signed-in.js'); // Importing the middleware
+const isSignedIn = require('./middleware/is-signed-in.js');
 const foodsController = require('./controllers/foods.js');
 
 const app = express();
@@ -18,6 +19,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride('_method'));
 
+// Set EJS as the view engine
+app.set('view engine', 'ejs'); // Add this line
+app.set('views', path.join(__dirname, 'views')); // Add this line if views are in a different folder
+
 // Session setup
 app.use(
   session({
@@ -27,14 +32,17 @@ app.use(
   })
 );
 
-app.use(passUserToView); // Session must be initialized before this middleware
+app.use(passUserToView); 
 
 // Route definitions
-app.use('/auth', authController);  // Use auth routes
-app.use('/users/:userId/foods', isSignedIn, foodsController); // Protect this route with the middleware
+app.use('/auth', authController); 
 
-// Home route
+// Protect food routes with middleware
+app.use('/users/:userId/foods', isSignedIn, foodsController); 
+
+// Home route must be before the catch-all route
 app.get('/', (req, res) => {
+  console.log('Home route accessed');
   res.render('index.ejs', {
     user: req.session.user,
   });

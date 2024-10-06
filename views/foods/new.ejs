@@ -7,12 +7,16 @@
   </head>
   <body>
     <h1>Create a New Food!</h1>
-    <form action="/users/:userId/foods" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" name="name" id="name" />
-    
-    
-        <button type="submit">Add Food</button>
-      </form>
+    <form action="/users/<%= userId %>/foods" method="POST">
+      <input type="hidden" name="userId" value="<%= userId %>">
+      
+      <label for="name">Food Name:</label>
+      <input type="text" id="name" name="name" required>
+      <label for="calories">Calories:</label>
+      <input type="number" id="calories" name="calories" required>
+      <label for="expirationDate">Expiration Date:</label>
+      <input type="date" id="expirationDate" name="expirationDate" required>
+      <button type="submit">Create Food</button>
+    </form>
   </body>
 </html>

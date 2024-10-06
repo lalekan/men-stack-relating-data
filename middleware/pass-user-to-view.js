@@ -1,16 +1,19 @@
-// middleware/pass-user-to-view.js
+const mongoose = require('mongoose');
 
 const passUserToView = (req, res, next) => {
-
   if (req.session && req.session.user) {
-    res.locals.user = req.session.user;
+
+    console.log('User ID:', req.session.user._id);
+    
+    const isValidUser = mongoose.Types.ObjectId.isValid(req.session.user._id);
+    
+    res.locals.user = isValidUser ? req.session.user : null;  
+    res.locals.isValidUser = isValidUser; 
   } else {
-    res.locals.user = null;  // Set to null if req.user is undefined
+    res.locals.user = null; 
+    res.locals.isValidUser = false;  
   }
   next();
-    // res.locals.user = req.session.user ? req.session.user : null
-    // next()
 }
-  
-  module.exports = passUserToView
-  
+
+module.exports = passUserToView;

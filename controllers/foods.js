@@ -1,85 +1,67 @@
-// controllers/foods.js
-
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 
 const User = require('../models/user.js');
 const Food = require('../models/food.js');
 
-// router logic will go here - will be built later on in the lab
+// Route to render the new food form
+router.get('/new', (req, res) => {
+  if (!req.user) {
+    console.error('User is not defined. Cannot access new food page.');
+    return res.redirect('/auth/sign-in'); 
+  }
 
-router.get('/', async (req, res) => {
-    const userId = req.params.userId; // Get user ID from request parameters
+  console.log('Accessing create new food page for user:', req.user._id);
+
+  const userId = req.params.userId
   
-    try {
-      // Fetch food items from the database for the given user
-      const foods = await Food.find({ userId: userId }); 
-  
-      // Render the view and pass the foods data
-      res.render('foods/index.ejs', { food: foods }); // Pass the foods as 'food'
-    } catch (error) {
-      console.error('Error fetching foods:', error); // Log the error
-      res.status(500).send('Server Error'); // Send a 500 error response
-    }
-  });
-
-router.get('/users/:userId/foods/new', (req, res) => {
-    res.render('foods/new.ejs')
-})
-
-router.get('/users/:userId/foods', async (req, res) => {
-    try {
-      const user = await User.findById(req.params.userId);
-      if (!user) {
-        return res.status(404).send('User not found');
-      }
-  
-      // Log the pantry data
-      console.log(user.pantry, 'Pantry data being passed to EJS');
-      
-      // Pass the user's pantry items (foods) to the view as 'food'
-      res.render('foods/index.ejs', { food: user.pantry });
-    } catch (error) {
-      console.error('Error Fetching User Foods:', error);
-      res.status(500).send('Server Error');
-    }
-  });
-
-  // Route to get food items for a specific user
-  router.get('/:userId', async (req, res) => {
-    try {
-      const user = await User.findById(req.params.userId);
-      console.log('Fetched user:', user);
-      console.log('User pantry:', user.pantry);
-
-      if (!user) {
-        return res.status(404).send('User not found');
-      }
-  
-      // Pass the user's pantry to the view
-      res.render('foods/index.ejs', { food: user.pantry || [] }); // Ensure food is defined
-    } catch (error) {
-      console.error('Error fetching food:', error);
-      res.status(500).send('Server Error');
-    }
-  });
-  
-
-  router.post('/', async (req, res) => {
-    try {
-        const foodItem = new Food({
-            name: req.body.name,
-            calories: req.body.calories,
-            expirationDate: req.body.expirationDate,
-            userId: req.params.userId 
-        });
-
-        await foodItem.save();
-        res.status(201).json({ message: 'Food item added successfully.' });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+  res.render('foods/new', { userId: userId });
 });
 
+// Route to handle food creation
+router.post('/', async (req, res) => {
+  const userId = req.user._id; 
+  console.log('Creating food for User ID:', userId);
+
+  try {
+    const foodItem = new Food({
+      name: req.body.name,
+      calories: req.body.calories,
+      expirationDate: req.body.expirationDate,
+    });
+
+    await foodItem.save();
+
+    const user = await User.findById(userId);
+    user.pantry.push(foodItem._id);
+    await user.save();
+
+    res.redirect(`/users/${userId}/foods`);
+  } catch (error) {
+    console.error('Error creating food item:', error);
+    res.status(500).send('Server error');
+  }
+});
+
+// Route to fetch food items for the user's pantry
+router.get('/', async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const user = await User.findById(userId);
+    const foods = await Food.find({ _id: { $in: user.pantry } });
+    res.render('foods/index.ejs', { food: foods });
+  } catch (error) {
+    console.error('Error fetching food:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
+// Invalid route handling
+router.get('*', (req, res) => {
+  console.log('Invalid Route Accessed:', req.originalUrl);
+  res.status(404).send('Not Found');
+});
 
 module.exports = router;
