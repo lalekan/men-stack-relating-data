@@ -20,8 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride('_method'));
 
 // Set EJS as the view engine
-app.set('view engine', 'ejs'); // Add this line
-app.set('views', path.join(__dirname, 'views')); // Add this line if views are in a different folder
+app.set('view engine', 'ejs'); 
 
 // Session setup
 app.use(

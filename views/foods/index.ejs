@@ -10,8 +10,9 @@
     <h1>Welcome to CookBook</h1>
     <ul>
       <% if (food && food.length > 0) { %>
-        <% food.forEach((item) => { %> <!-- Loop over each food item -->
-            <li><%= item.name %> - Calories: <%= item.calories %>, Expiration: <%= item.expirationDate.toDateString() %></li>
+        <% food.forEach((item) => { %> 
+            <li><a href="/users/<%= user._id %>/foods/<%= item._id %>"><%= item.name %></li>
+              
         <% }) %>
       <% } else { %>
         <li>No food items found.</li>
