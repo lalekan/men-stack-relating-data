@@ -10,6 +10,7 @@ const passUserToView = require('./middleware/pass-user-to-view.js');
 const authController = require('./controllers/auth.js');
 const isSignedIn = require('./middleware/is-signed-in.js');
 const foodsController = require('./controllers/foods.js');
+const userController = require('./controllers/users.js');
 
 const app = express();
 const port = process.env.PORT || '3000';
@@ -35,6 +36,7 @@ app.use(passUserToView);
 
 // Route definitions
 app.use('/auth', authController); 
+app.use('/users', userController);
 
 // Protect food routes with middleware
 app.use('/users/:userId/foods', isSignedIn, foodsController); 

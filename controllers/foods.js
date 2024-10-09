@@ -52,7 +52,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Route to display a specific food item
+
 router.get('/:foodId', async (req, res) => {
   const foodId = req.params.foodId;
 
@@ -93,19 +93,21 @@ router.put('/:foodId', async (req, res) => {
   const foodId = req.params.foodId;
 
   try {
-    const updatedFood = await Food.findByIdAndUpdate(
-      foodId,
-      { name: req.body.name },
-      { new: true } 
-    );
+    // Find the food item by ID
+    const food = await Food.findById(foodId);
 
-    if (!updatedFood) {
+    if (!food) {
       console.error('Food item not found for update');
       return res.status(404).send('Food item not found');
     }
 
+    food.set({
+      name: req.body.name,
+    });
+    const updatedFood = await food.save();
+
     console.log('Food item updated successfully:', updatedFood);
-    res.redirect(`/users/${req.session.user._id}/foods`);
+    res.redirect(`/users/${req.session.user._id}/foods/${updatedFood._id}`);
   } catch (error) {
     console.error('Error updating food item:', error);
     res.status(500).send('Server Error');
